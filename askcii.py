@@ -11,10 +11,7 @@ from diffusers import StableDiffusionPipeline
 ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
 
 
-def resize_image(image, new_width=100):
-    width, height = image.size
-    ratio = height / width
-    new_height = int(new_width * ratio)
+def resize_image(image, new_width, new_height):
     return image.resize((new_width, new_height))
 
 
@@ -27,8 +24,8 @@ def pixels_to_ascii(image):
     return "".join([ASCII_CHARS[pixel // 25] for pixel in pixels])
 
 
-def image_to_ascii(image, new_width=100):
-    image = resize_image(image, new_width)
+def image_to_ascii(image, new_width, new_height):
+    image = resize_image(image, new_width, new_height)
     grayscale_image = to_grayscale(image)
     ascii_str = pixels_to_ascii(grayscale_image)
 
@@ -96,7 +93,13 @@ def parse_arguments():
         "-w",
         "--width",
         type=int,
-        help="Width to resize the image (default: original width), height is resized accordingly to maintain the aspect ratio",
+        help="Width to resize the image (default: original width)",
+    )
+    parser.add_argument(
+        "-h",
+        "--height",
+        type=int,
+        help="Height to resize the image (default: original height)",
     )
     parser.add_argument(
         "-s",
@@ -124,9 +127,9 @@ def main(args):
             if image:
                 print(f"Creating ASCII art from: {args.url_or_path}")
                 if args.width:
-                    ascii_art = image_to_ascii(image, args.width)
+                    ascii_art = image_to_ascii(image, args.width, args.height)
                 else:
-                    ascii_art = image_to_ascii(image, image.width)
+                    ascii_art = image_to_ascii(image, image.width, image.height)
             else:
                 print("Using default image as fallback.")
                 ascii_art = generate_default_ascii()
