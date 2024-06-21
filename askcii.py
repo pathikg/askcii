@@ -123,9 +123,9 @@ def parse_arguments():
 def main(args):
     if args.command == "create":
         if args.url:
-            image = load_image_from_url_or_path(args.url_or_path)
+            image = load_image_from_url_or_path(args.url)
             if image:
-                print(f"Creating ASCII art from: {args.url_or_path}")
+                print(f"Creating ASCII art from: {args.url}")
                 if args.width:
                     ascii_art = image_to_ascii(image, args.width, args.height)
                 else:
