@@ -4,7 +4,9 @@ import requests
 from io import BytesIO
 from urllib.parse import urlparse
 
+import torch
 from PIL import Image
+from diffusers import StableDiffusionPipeline
 
 ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
 
@@ -39,6 +41,14 @@ def image_to_ascii(image, new_width=100):
     return ascii_img
 
 
+def generate_image_from_prompt(prompt, model_id, steps):
+    pipe = StableDiffusionPipeline.from_pretrained(model_id)
+    pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
+
+    image = pipe(prompt, num_inference_steps=10).images[0]
+    return image
+
+
 def generate_default_ascii():
     default_image = Image.new("RGB", (100, 100), color="white")
     return image_to_ascii(default_image)
@@ -69,12 +79,38 @@ def load_image_from_url_or_path(url_or_path):
 def parse_arguments():
     parser = argparse.ArgumentParser(description="ASKCII: ASCII Art Generator")
     parser.add_argument("command", choices=["create"], help="Command to execute")
-    parser.add_argument("url_or_path", nargs="?", help="URL or path to the image file")
+    parser.add_argument(
+        "-u",
+        "--url",
+        required=False,
+        nargs="?",
+        help="URL or path to the image file",
+    )
+    parser.add_argument(
+        "-p",
+        "--prompt",
+        required=False,
+        help="Prompt to generate the ASCII art",
+    )
     parser.add_argument(
         "-w",
         "--width",
         type=int,
         help="Width to resize the image (default: original width), height is resized accordingly to maintain the aspect ratio",
+    )
+    parser.add_argument(
+        "-s",
+        "--steps",
+        type=int,
+        default=20,
+        help="Number of inference steps for Stable Diffusion (default: 50)",
+    )
+    parser.add_argument(
+        "-m",
+        "--model",
+        type=str,
+        default="stabilityai/stable-diffusion-2",
+        help="Diffusion model to use (default: stabilityai/stable-diffusion-2)",
     )
 
     args = parser.parse_args()
@@ -83,7 +119,7 @@ def parse_arguments():
 
 def main(args):
     if args.command == "create":
-        if args.url_or_path:
+        if args.url:
             image = load_image_from_url_or_path(args.url_or_path)
             if image:
                 print(f"Creating ASCII art from: {args.url_or_path}")
@@ -94,6 +130,10 @@ def main(args):
             else:
                 print("Using default image as fallback.")
                 ascii_art = generate_default_ascii()
+        elif args.prompt:
+            print("Loading Model...")
+            image = generate_image_from_prompt(args.prompt, args.model, args.steps)
+            ascii_art = image_to_ascii(image, image.width)
         else:
             print("Using default image.")
             ascii_art = generate_default_ascii()
