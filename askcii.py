@@ -45,7 +45,7 @@ def generate_image_from_prompt(prompt, model_id, steps):
     pipe = StableDiffusionPipeline.from_pretrained(model_id)
     pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
 
-    image = pipe(prompt, num_inference_steps=10).images[0]
+    image = pipe(prompt, num_inference_steps=steps).images[0]
     return image
 
 
@@ -109,8 +109,8 @@ def parse_arguments():
         "-m",
         "--model",
         type=str,
-        default="stabilityai/stable-diffusion-2",
-        help="Diffusion model to use (default: stabilityai/stable-diffusion-2)",
+        default="stabilityai/stable-diffusion-2-1-base",
+        help="Diffusion model to use (default: stable-diffusion-2-1-base)",
     )
 
     args = parser.parse_args()
@@ -133,7 +133,7 @@ def main(args):
         elif args.prompt:
             print("Loading Model...")
             image = generate_image_from_prompt(args.prompt, args.model, args.steps)
-            ascii_art = image_to_ascii(image, image.width)
+            ascii_art = image_to_ascii(image, args.width)
         else:
             print("Using default image.")
             ascii_art = generate_default_ascii()
