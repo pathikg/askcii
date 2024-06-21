@@ -90,13 +90,13 @@ def parse_arguments():
         help="Prompt to generate the ASCII art",
     )
     parser.add_argument(
-        "-w",
+        "-wt",
         "--width",
         type=int,
         help="Width to resize the image (default: original width)",
     )
     parser.add_argument(
-        "-h",
+        "-ht",
         "--height",
         type=int,
         help="Height to resize the image (default: original height)",
