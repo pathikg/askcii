@@ -133,7 +133,7 @@ def main(args):
         elif args.prompt:
             print("Loading Model...")
             image = generate_image_from_prompt(args.prompt, args.model, args.steps)
-            ascii_art = image_to_ascii(image, image.width)
+            ascii_art = image_to_ascii(image, args.width)
         else:
             print("Using default image.")
             ascii_art = generate_default_ascii()
